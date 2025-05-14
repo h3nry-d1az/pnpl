@@ -1,3 +1,18 @@
+"""A command line interface for PNPL, which includes the following features (see `pnpl -h`):
+```
+usage: pnpl [-h] [-e program] [-r file_name] [--repl] [-c input_file output_file] [-m size]
+
+Prime Number Programming Language, an esoteric language based on the fundamental theorem of arithmetic.
+
+options:
+  -h, --help            show this help message and exit
+  -e, --eval program    execute the program provided as an argument.
+  -r, --run file_name   read and execute the program stored in the input file.
+  --repl                start the PNPL REPL.
+  -c, --convert input_file output_file
+                        convert a Brainfuck program to PNPL.
+  -m, --memory size     set the size of the memory array.
+```"""
 from . import PNPL
 from .opcode import Opcode
 from .primality import next_prime
