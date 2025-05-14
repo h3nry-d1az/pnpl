@@ -18,6 +18,9 @@ classifiers = [
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
 
+[project.scripts]
+pnpl = "pnpl.__main__:main"
+
 [project.urls]
 Homepage = "https://github.com/h3nry-d1az/pnpl"
 Issues = "https://github.com/h3nry-d1az/pnpl/issues"

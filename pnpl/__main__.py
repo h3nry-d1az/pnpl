@@ -23,22 +23,22 @@ from sys import set_int_max_str_digits
 def repl(memory: int) -> None:
     """REPL entry point."""
     print('Welcome to the PNPL sandbox! Here you can execute your programs interactively.\n'
-          'Type `help` to see all the available commands.', end='\n\n')
+          'Type `help` to see all the available commands.')
     n = 1
     memsize = memory
     machine = PNPL(2)
     machine.reset(memsize)
     while True:
-        instruction = input(f'[{n}] ').strip()
+        instruction = input(f'\n[{n}] ').strip()
         if instruction == 'help':
-            print('Welcome to the PNPL sandbox! Here you can execute your programs interactively.\n'
+            print('\nWelcome to the PNPL sandbox! Here you can execute your programs interactively.\n'
                   'Type any valid program and the interpreter will execute it, although it will not clean the memory tape afterwards.\n'
                   'There are a few special commands for debugging purposes as well:\n',
                   "- reset: Deliberately resets the machine's memory, pointer and program counter.\n"
                   " - dump: Prints the machine's memory tape, but does not erase it.\n"
                   " - mem (size): Change the size of the memory to the provided integer, truncating or extending the previous tape.\n"
                   " - bf (program): Translate, print, and then execute a Brainfuck program.\n"
-                  " - exit: Exits the REPL.\n")
+                  " - exit: Exits the REPL.")
         elif instruction == 'exit': return
         elif instruction == 'reset': machine.reset(memsize)
         elif instruction == 'dump': print(*machine.memory)
