@@ -1,38 +1,85 @@
-from math import floor, sqrt
+from . import PNPL
+from .opcode import Opcode
+from .primality import next_prime
+
+import argparse
 from sys import set_int_max_str_digits
 
-def is_prime(n: int) -> bool:
-    """Check whether $n$ is prime or not."""
-    if n <= 1: return False
-    for k in range(2, floor(sqrt(n))+1):
-        if n % k == 0:
-            return False
-    return True
+def repl(memory: int) -> None:
+    """REPL entry point."""
+    print('Welcome to the PNPL sandbox! Here you can execute your programs interactively.\n'
+          'Type `help` to see all the available commands.', end='\n\n')
+    n = 1
+    memsize = memory
+    machine = PNPL(2)
+    machine.reset(memsize)
+    while True:
+        instruction = input(f'[{n}] ').strip()
+        if instruction == 'help':
+            print('Welcome to the PNPL sandbox! Here you can execute your programs interactively.\n'
+                  'Type any valid program and the interpreter will execute it, although it will not clean the memory tape afterwards.\n'
+                  'There are a few special commands for debugging purposes as well:\n',
+                  "- reset: Deliberately resets the machine's memory, pointer and program counter.\n"
+                  " - dump: Prints the machine's memory tape, but does not erase it.\n"
+                  " - mem (size): Change the size of the memory to the provided integer, truncating or extending the previous tape.\n"
+                  " - bf (program): Translate, print, and then execute a Brainfuck program.\n"
+                  " - exit: Exits the REPL.\n")
+        elif instruction == 'exit': return
+        elif instruction == 'reset': machine.reset(memsize)
+        elif instruction == 'dump': print(*machine.memory)
+        elif instruction[0:3] == 'mem':
+            try:
+                memsize = int(instruction.split(' ')[1])
+                newmem = [0]*memsize
+                for i, e in enumerate(machine.memory):
+                    try: newmem[i] = e
+                    except IndexError: break
+                machine.memory = newmem
+            except ValueError: print('Invalid memory size, not an integer.')
+        elif instruction[0:2] == 'bf':
+            p = bf2pnpl(instruction.split(' ')[1])
+            print(p)
+            machine.load(p)
+            machine.run()
+        elif instruction == 'doggo': print('A dog walked into a tavern and said, "I can\'t see a thing. I\'ll open this one."')
+        elif instruction == '': continue
+        else:
+            try: machine.load(int(instruction)); machine.run()
+            except ValueError: print('Invalid PNPL program, not an integer.')
+        n += 1
 
-__current_pn = 1
-def next_prime() -> int:
-    global __current_pn
-    __current_pn += 1
-    while not is_prime(__current_pn): __current_pn += 1
-    return __current_pn
 
-def opcode_to_int(c: str) -> int:
-    match c:
-        case '>': return 1
-        case '<': return 2
-        case '+': return 3
-        case '-': return 4
-        case '[': return 5
-        case ']': return 6
-        case ',': return 7
-        case '.': return 8
-        case _:   return 0
+def bf2pnpl(program: str) -> int:
+    """Convert a Brainfuck program to PNPL."""
+    n = 1
+    for opcode in program:
+        exponent = Opcode.from_bf(opcode) 
+        n = n * next_prime()**(exponent.value) if exponent else n
+    return n
 
-set_int_max_str_digits(1_000_000_000)
+def main() -> None:
+    """Entry point of the CLI."""
+    set_int_max_str_digits(2147483647)
+    machine_memory = 1024
 
-n = 1
-program = input()
+    cli = argparse.ArgumentParser(description='Prime Number Programming Language, an esoteric language based on the fundamental theorem of arithmetic.')
 
-for opcode in program: n = n * next_prime()**(opcode_to_int(opcode)) if opcode_to_int(opcode) != 0 else n
+    cli.add_argument("-e", "--eval", type=int, nargs=1, metavar='program', default=None, help="execute the program provided as an argument.")
+    cli.add_argument("-r", "--run", type=str, nargs=1, metavar='file_name', default=None, help="read and execute the program stored in the input file.")
+    cli.add_argument("--repl", action='store_true', help="start the PNPL REPL.")
+    cli.add_argument("-c", "--convert", type=str, nargs=2, metavar=('input_file', 'output_file'), default=None, help="convert a Brainfuck program to PNPL.")
 
-print(n)
+    cli.add_argument("-m", "--memory", type=int, nargs=1, metavar='size', default=None, help="set the size of the memory array.")
+
+    args = cli.parse_args()
+
+    if args.memory: machine_memory = args.memory[0]
+
+    if args.eval: PNPL(args.eval[0], machine_memory).run()
+    elif args.run: PNPL.from_file(args.run[0], machine_memory).run()
+    elif args.repl: repl(machine_memory)
+    elif args.convert:
+        open(args.convert[1], 'w').write(str(bf2pnpl(open(args.convert[0]).read())))
+
+
+if __name__ == '__main__': main()

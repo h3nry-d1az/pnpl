@@ -1,52 +1,46 @@
-from typing import List, Tuple, Set
-from enum import Enum
+""".. include:: ../README.md"""
+from . import opcode
+from . import primality
 
-from sys import set_int_max_str_digits
+from typing import List
 
-set_int_max_str_digits(1_000_000_000)
-
-def factor(n: int) -> Set[Tuple[int, int]]:
-    r"""Factors $n$ into its prime factors, represented as a set with tuples of the form $(p_k, \alpha_k)$."""
-    factors = set()
-    m = n
-    for pk in range(2, n):
-        if n % pk == 0:
-            alphak = 0
-            while m % pk == 0:
-                alphak += 1
-                m //= pk
-            factors.add((pk, alphak))
-            factors |= factor(m)
-            break
-    if m == n and m != 1: factors.add((m, 1))
-    return factors
-
-class Opcode(Enum):
-    INC_PTR = 1
-    DEC_PTR = 2
-    ADD     = 3
-    SUB     = 4
-    LOOP_ST = 5
-    LOOP_EN = 6
-    GETCH   = 7
-    PUTCH   = 8
+from .opcode import Opcode
+from .primality import factor
 
 class PNPL:
+    """This class represents a PNPL interpreter, identical in functionality to any Brainfuck one but with prime numbers as instructions."""
     memory: List[int]
     pointer: int = 0
     program: List[Opcode]
     program_counter: int = 0
-    loop_stack: List[int]
+    __loop_stack: List[int]
     __level: int = 0
 
     def __init__(self, program: int, memory_size: int = 1024) -> None:
+        """Creates a PNPL machine from its input (integer) program and the size of its memory array (by default $1024$)."""
         self.program = list(map(lambda t: Opcode(t[1]), sorted(factor(program))))
         self.memory = [0]*memory_size
-        self.loop_stack = []
         self.pointer = 0
+        self.program_counter = 0
+        self.__loop_stack = []
+
+    @classmethod
+    def from_file(cls, path: str, memory_size: int = 1024):
+        """Works identically to the main constructor but the path of the program file must be provided instead of its literal value."""
+        program = 0
+        with open(path) as file:
+            for char in file.read():
+                try: program = 10*program + int(char)
+                except ValueError: continue
+        return cls(program, memory_size)
+
+    def load(self, program: int) -> None:
+        """Load a program into the machine."""
+        self.program = list(map(lambda t: Opcode(t[1]), sorted(factor(program))))
         self.program_counter = 0
 
     def run(self) -> None:
+        """Executes the program stored in memory."""
         while self.program_counter < len(self.program):
             match self.program[self.program_counter]:
                 case Opcode.INC_PTR: self.pointer = (self.pointer + 1) % len(self.memory)
@@ -58,29 +52,25 @@ class PNPL:
                         self.__level = 1
                         while self.__level > 0:
                             self.program_counter += 1
-                            # print(self.program_counter, self.program[self.program_counter], self.__level, len(self.program))
                             if self.program[self.program_counter] == Opcode.LOOP_ST:
                                 self.__level += 1
                             elif self.program[self.program_counter] == Opcode.LOOP_EN:
                                 self.__level -= 1
                     else:
-                        self.loop_stack.append(self.program_counter)
+                        self.__loop_stack.append(self.program_counter)
                 case Opcode.LOOP_EN:
                     if self.memory[self.pointer] != 0:
-                        self.program_counter = self.loop_stack[-1]
+                        self.program_counter = self.__loop_stack[-1]
                     else:
-                        self.loop_stack.pop()
+                        self.__loop_stack.pop()
                 case Opcode.GETCH: pass
                 case Opcode.PUTCH: print(chr(self.memory[self.pointer]), end='')
             self.program_counter += 1
 
-set_int_max_str_digits(1_000_000_000)
 
-num = 0
-
-with open(r'c:\Users\PC\Desktop\pnpl\src\num.txt') as file:
-    for n in file.read():
-        num = num*10 + int(n)
-    # print(num)
-
-PNPL(num, memory_size=4096).run()
+    def reset(self, memory_size: int = 1024) -> None:
+        """Reset the PNPL interpreter's program and memory."""
+        self.program = []
+        self.program_counter = 0
+        self.memory = [0]*memory_size
+        self.pointer = 0
