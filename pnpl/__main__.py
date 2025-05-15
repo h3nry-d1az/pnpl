@@ -17,7 +17,7 @@ options:
 ```"""
 from . import PNPL
 from .opcode import Opcode
-from .primality import next_prime, factor
+from .primality import factor, next_prime, reset_prime_counter
 
 import argparse
 from sys import set_int_max_str_digits
@@ -72,6 +72,7 @@ def repl(memory: int) -> None:
 
 def bf2pnpl(program: str) -> int:
     """Convert a Brainfuck program to PNPL."""
+    reset_prime_counter()
     n = 1
     for opcode in program:
         exponent = Opcode.from_bf(opcode) 

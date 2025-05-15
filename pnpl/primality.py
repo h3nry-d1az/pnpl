@@ -33,3 +33,8 @@ def next_prime() -> int:
     __current_pn += 1
     while not is_prime(__current_pn): __current_pn += 1
     return __current_pn
+
+def reset_prime_counter() -> None:
+    """Resets the state of the `next_prime` function."""
+    global __current_pn
+    __current_pn = 1
