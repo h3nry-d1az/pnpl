@@ -46,7 +46,7 @@ def repl(memory: int) -> None:
         elif instruction == 'dump': print(*machine.memory)
         elif len(instruction) >= 3 and instruction[0:3] == 'mem':
             try:
-                memsize = int(instruction.split(' ')[1])
+                memsize = int(instruction[3:])
                 newmem = [0]*memsize
                 for i, e in enumerate(machine.memory):
                     try: newmem[i] = e
@@ -56,7 +56,7 @@ def repl(memory: int) -> None:
             except IndexError: print('The `mem` command requires a memory size as argument.')
         elif instruction[0:2] == 'bf':
             try:
-                p = bf2pnpl(instruction.split(' ')[1])
+                p = bf2pnpl(instruction[3:])
                 print(p)
                 machine.load(p)
                 machine.run()
@@ -88,8 +88,7 @@ def pnpl2bf(program: int) -> str:
 
 def main() -> None:
     """Entry point of the CLI."""
-    set_int_max_str_digits(2147483647)
-    machine_memory = 1024
+    set_int_max_str_digits(1<<31-1)
 
     cli = argparse.ArgumentParser(description='Prime Number Programming Language, an esoteric language based on the fundamental theorem of arithmetic.')
 
@@ -99,11 +98,11 @@ def main() -> None:
     cli.add_argument("-b2p", "--bf2pnpl", type=str, nargs=2, metavar=('input_file', 'output_file'), default=None, help="convert a Brainfuck program to PNPL.")
     cli.add_argument("-p2b", "--pnpl2bf", type=str, nargs=2, metavar=('input_file', 'output_file'), default=None, help="convert a PNPL program to Brainfuck.")
 
-    cli.add_argument("-m", "--memory", type=int, nargs=1, metavar='size', default=None, help="set the size of the memory array.")
+    cli.add_argument("-m", "--memory", type=int, nargs=1, metavar='size', default=1024, help="set the size of the memory array.")
 
     args = cli.parse_args()
 
-    if args.memory: machine_memory = args.memory[0]
+    machine_memory = args.memory[0]
 
     if args.eval: PNPL(args.eval[0], machine_memory).run()
     elif args.run: PNPL.from_file(args.run[0], machine_memory).run()
