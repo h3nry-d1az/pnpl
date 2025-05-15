@@ -4,15 +4,22 @@ from . import primality
 
 from typing import List
 
+from getch import getch
+
 from .opcode import Opcode
 from .primality import factor
 
 class PNPL:
     """This class represents a PNPL interpreter, identical in functionality to any Brainfuck one but with prime numbers as instructions."""
+    
     memory: List[int]
+    """Memory tape of the (Turing) machine."""
     pointer: int = 0
+    """Memory pointer, indicates the current memory cell being selected."""
     program: List[Opcode]
+    """The stored program to be executed, described as an array of operations (`Opcode`)."""
     program_counter: int = 0
+    """Program pointer, represents the current instruction being executed."""
     __loop_stack: List[int]
     __level: int = 0
 
@@ -63,7 +70,7 @@ class PNPL:
                         self.program_counter = self.__loop_stack[-1]
                     else:
                         self.__loop_stack.pop()
-                case Opcode.GETCH: pass
+                case Opcode.GETCH: self.memory[self.pointer] = ord(getch())
                 case Opcode.PUTCH: print(chr(self.memory[self.pointer]), end='')
             self.program_counter += 1
 

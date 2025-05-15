@@ -3,14 +3,23 @@ from enum import Enum
 
 class Opcode(Enum):
     """An enum that groups all PNPL instructions."""
+
     INC_PTR = 1
+    """Moves the memory pointer to the right."""
     DEC_PTR = 2
+    """Moves the memory pointer to the left."""
     ADD     = 3
+    """Increases the memory cell at the pointer by one."""
     SUB     = 4
+    """Decreases the memory cell at the pointer by one."""
     LOOP_ST = 5
+    """Jumps past the matching `LOOP_EN` if the cell at the pointer is 0."""
     LOOP_EN = 6
+    """Jumps back to the matching `LOOP_ST` if the cell at the pointer is nonzero."""
     GETCH   = 7
+    """Inputs a character and stores it in the cell at the pointer."""
     PUTCH   = 8
+    """Outputs the character encoded by the cell at the pointer."""
 
     @classmethod
     def from_bf(cls, char: str):
@@ -28,7 +37,7 @@ class Opcode(Enum):
 
     @property
     def as_bf(self) -> str:
-        """Return the analog Brainfuck operation."""
+        """Convert the instruction to its Brainfuck analog."""
         match self:
             case Opcode.INC_PTR: return '>'
             case Opcode.DEC_PTR: return '<'
