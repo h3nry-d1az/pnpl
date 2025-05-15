@@ -102,7 +102,7 @@ def main() -> None:
 
     args = cli.parse_args()
 
-    machine_memory = args.memory[0]
+    machine_memory = args.memory
 
     if args.eval: PNPL(args.eval[0], machine_memory).run()
     elif args.run: PNPL.from_file(args.run[0], machine_memory).run()
