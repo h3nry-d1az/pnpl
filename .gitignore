@@ -173,6 +173,6 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Brainfuck and PNPL programs
+# Brainfuck programs
+*.b
 *.bf
-*.pp

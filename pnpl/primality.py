@@ -2,18 +2,18 @@
 from typing import Tuple, Set
 from math import floor, sqrt
 
-def factor(n: int) -> Set[Tuple[int, int]]:
+def factor(n: int, __start: int = 2) -> Set[Tuple[int, int]]:
     r"""Decompose $n$ into its prime factors, represented as a set with tuples of the form $(p_k, \alpha_k)$, where $p_k$ is each prime dividing $n$ and $\alpha_k$ its exponent."""
     factors = set()
     m = n
-    for pk in range(2, n):
+    for pk in range(__start, n):
         if n % pk == 0:
             alphak = 0
             while m % pk == 0:
                 alphak += 1
                 m //= pk
             factors.add((pk, alphak))
-            factors |= factor(m)
+            factors |= factor(m, pk+1)
             break
     if m == n and m != 1: factors.add((m, 1))
     return factors

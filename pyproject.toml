@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pnpl"
-version = "0.1.0"
+version = "1.0.0"
 description = "Prime Number Programming Language, an esoteric language based on the fundamental theorem of arithmetic"
 authors = [
   { name="Henry Díaz Bordón", email="henrydiazbordon@gmail.com" },
